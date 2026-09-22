@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getCompetitions,
   getCompetitionById,
+  createCompetition
 } from '../controllers/competitionController';
 import {
   registerForCompetition,
@@ -20,9 +21,7 @@ router.get('/', getCompetitions);
 router.get('/:id', validateCompetitionId, getCompetitionById);
 
 // Protected routes — require authentication
-router.post('/', authenticate, (req, res, next) => {
-  import('../controllers/competitionController').then((c) => c.createCompetition(req, res, next)).catch(next);
-});
+router.post('/', authenticate, createCompetition);
 router.post(
   '/:id/register',
   authenticate,

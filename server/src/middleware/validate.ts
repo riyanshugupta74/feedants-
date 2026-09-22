@@ -75,3 +75,29 @@ export const validateCompetitionId = [
     .withMessage('Invalid competition ID'),
   handleValidationErrors,
 ];
+
+export const validateCreateCompetition = [
+  body('title')
+    .trim()
+    .notEmpty().withMessage('Title is required')
+    .isLength({ max: 200 }).withMessage('Title must be at most 200 characters'),
+  body('description')
+    .trim()
+    .notEmpty().withMessage('Description is required')
+    .isLength({ max: 5000 }).withMessage('Description must be at most 5000 characters'),
+  body('category')
+    .trim()
+    .notEmpty().withMessage('Category is required'),
+  body('prizePool')
+    .isNumeric().withMessage('Prize pool must be a number')
+    .custom((val) => val >= 0).withMessage('Prize pool cannot be negative'),
+  body('entryFee')
+    .isNumeric().withMessage('Entry fee must be a number')
+    .custom((val) => val >= 0).withMessage('Entry fee cannot be negative'),
+  body('maxParticipants')
+    .isInt({ min: 1 }).withMessage('Max participants must be at least 1'),
+  body('image')
+    .optional({ checkFalsy: true })
+    .isURL().withMessage('Image must be a valid URL'),
+  handleValidationErrors,
+];
