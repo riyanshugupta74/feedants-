@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Feedants",
+    "slug": "feedants-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0D5C63"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.feedants.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D5C63"
+      },
+      "package": "com.feedants.mobile"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
