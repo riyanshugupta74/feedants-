@@ -1,6 +1,7 @@
 import app from './app';
 import { connectDatabase } from './config/database';
 import { env } from './config/env';
+import { exec } from 'child_process';
 
 let server: any;
 
@@ -8,6 +9,17 @@ const startServer = async (): Promise<void> => {
   try {
     // Connect to MongoDB
     await connectDatabase();
+
+    // TEMPORARY SEED ROUTE TO BYPASS ISP BLOCKS
+    app.get('/api/seed', (req, res) => {
+      exec('npx ts-node src/seeds/seed.ts', (error, stdout, stderr) => {
+        if (error) {
+          res.status(500).send(`<pre>Seed Error: ${error.message}\n${stderr}</pre>`);
+          return;
+        }
+        res.send(`<pre>Seed Success!\n${stdout}</pre>`);
+      });
+    });
 
     // Start Express server
     server = app.listen(env.PORT, () => {
