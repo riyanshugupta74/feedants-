@@ -1,13 +1,9 @@
 import { Platform } from 'react-native';
 
 /**
- * API base URL — use 10.0.2.2 for Android emulator, localhost for iOS
+ * API base URL — pointing to production Render server
  */
-export const API_BASE_URL = Platform.select({
-  android: 'http://10.0.2.2:5000/api',
-  ios: 'http://localhost:5000/api',
-  default: 'http://localhost:5000/api',
-});
+export const API_BASE_URL = 'https://feedants-xc61.onrender.com/api';
 
 export const QUERY_KEYS = {
   competitions: 'competitions',
