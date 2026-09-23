@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../theme';
 import { Competition, CompetitionStatus, Participation, SubmissionStatus } from '../types';
+import { useAuth } from '../hooks/useAuth';
 
 interface Props {
   competition: Competition;
@@ -34,9 +35,17 @@ const PrimaryActionButton: React.FC<Props> = ({
 }) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [useWalletBalance, setUseWalletBalance] = useState(true);
 
+  const { user } = useAuth();
+  
   const status = competition.computedStatus;
   const hasSubmitted = participation?.submissionStatus === SubmissionStatus.SUBMITTED;
+
+  const walletBalance = user?.referralEarnings || 0;
+  const entryFee = competition.entryFee;
+  const discount = useWalletBalance ? Math.min(walletBalance, entryFee) : 0;
+  const amountToPay = Math.max(0, entryFee - discount);
 
   const handleSimulatedPayment = () => {
     setIsProcessingPayment(true);
@@ -212,8 +221,31 @@ const PrimaryActionButton: React.FC<Props> = ({
             </View>
 
             <View style={styles.checkoutSummary}>
-              <Text style={styles.summaryLabel}>{competition.title}</Text>
-              <Text style={styles.amountValue}>₹{competition.entryFee}</Text>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>{competition.title}</Text>
+                <Text style={styles.summaryAmount}>₹{entryFee}</Text>
+              </View>
+
+              {walletBalance > 0 && (
+                <TouchableOpacity 
+                  style={styles.walletToggleRow}
+                  onPress={() => setUseWalletBalance(!useWalletBalance)}
+                >
+                  <View style={styles.walletToggleLeft}>
+                    <View style={[styles.checkbox, useWalletBalance && styles.checkboxActive]}>
+                      {useWalletBalance && <Text style={styles.checkmark}>✓</Text>}
+                    </View>
+                    <Text style={styles.walletToggleText}>Use Wallet Balance (₹{walletBalance})</Text>
+                  </View>
+                  {useWalletBalance && <Text style={styles.discountText}>- ₹{discount}</Text>}
+                </TouchableOpacity>
+              )}
+
+              <View style={styles.divider} />
+              <View style={styles.summaryRow}>
+                <Text style={styles.totalLabel}>Total to Pay</Text>
+                <Text style={styles.amountValue}>₹{amountToPay}</Text>
+              </View>
             </View>
 
             <View style={styles.paymentMethods}>
@@ -324,19 +356,76 @@ const styles = StyleSheet.create({
     fontWeight: '300',
   },
   checkoutSummary: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     backgroundColor: colors.backgroundSecondary,
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.xl,
   },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
   summaryLabel: {
+    ...typography.body,
+    color: colors.textSecondary,
+    flex: 1,
+  },
+  summaryAmount: {
     ...typography.body,
     fontWeight: '600',
     color: colors.textPrimary,
-    flex: 1,
+  },
+  walletToggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  walletToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginRight: spacing.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  checkmark: {
+    color: colors.textInverse,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  walletToggleText: {
+    ...typography.caption,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  discountText: {
+    ...typography.caption,
+    color: colors.success,
+    fontWeight: '700',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: spacing.sm,
+  },
+  totalLabel: {
+    ...typography.body,
+    fontWeight: '700',
+    color: colors.textPrimary,
   },
   amountValue: {
     ...typography.h2,

@@ -7,6 +7,7 @@ export const authApi = {
     email: string;
     password: string;
     phone?: string;
+    referredByCode?: string;
   }): Promise<AuthResponse> => {
     const response = await apiClient.post<ApiResponse<AuthResponse>>(
       '/auth/register',

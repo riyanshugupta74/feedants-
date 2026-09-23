@@ -21,6 +21,7 @@ const RegisterScreen: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   
   const navigation = useNavigation<NavigationProp>();
@@ -41,7 +42,7 @@ const RegisterScreen: React.FC = () => {
     }
 
     try {
-      await register(name, email, password);
+      await register(name, email, password, referralCode.trim() || undefined);
       // If successful, navigate back to where they came from (MainTabs)
       navigation.goBack();
     } catch (err) {
@@ -113,6 +114,17 @@ const RegisterScreen: React.FC = () => {
               }}
               placeholder="Enter a strong password"
               secureTextEntry
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Referral Code (Optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={referralCode}
+              onChangeText={setReferralCode}
+              placeholder="e.g. FEED2026"
+              autoCapitalize="characters"
             />
           </View>
 

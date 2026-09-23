@@ -14,12 +14,21 @@ export const register = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, referredByCode } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new ConflictError('An account with this email already exists.');
+    }
+
+    // Process referral if valid
+    if (referredByCode) {
+      const referrer = await User.findOne({ referralCode: referredByCode });
+      if (referrer) {
+        referrer.referralEarnings += 50;
+        await referrer.save();
+      }
     }
 
     // Create user
@@ -28,6 +37,7 @@ export const register = async (
       email,
       password,
       phone: phone || '',
+      referralEarnings: referredByCode ? 50 : 0, // Give new user a bonus too!
     });
 
     // Generate token
@@ -43,6 +53,7 @@ export const register = async (
           profileImage: user.profileImage,
           phone: user.phone,
           referralCode: user.referralCode,
+          referralEarnings: user.referralEarnings,
         },
         token,
       },
