@@ -6,6 +6,7 @@ export const competitionsApi = {
     page?: number;
     limit?: number;
     category?: string;
+    search?: string;
   }): Promise<{
     competitions: Competition[];
     pagination: PaginationInfo;

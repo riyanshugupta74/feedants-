@@ -18,6 +18,7 @@ const CreateCompetitionScreen = () => {
   const [prizePool, setPrizePool] = useState('');
   const [entryFee, setEntryFee] = useState('');
   const [maxParticipants, setMaxParticipants] = useState('50');
+  const [statusPreset, setStatusPreset] = useState<'Upcoming' | 'Live' | 'Closed'>('Live');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -33,6 +34,30 @@ const CreateCompetitionScreen = () => {
 
     setIsSubmitting(true);
     try {
+      const now = new Date();
+      let regStart, regEnd, subStart, subEnd, resDate;
+      
+      if (statusPreset === 'Upcoming') {
+        regStart = new Date(now); regStart.setDate(now.getDate() + 5);
+        regEnd = new Date(regStart); regEnd.setDate(regStart.getDate() + 10);
+        subStart = new Date(regEnd); subStart.setDate(regEnd.getDate() + 1);
+        subEnd = new Date(subStart); subEnd.setDate(subStart.getDate() + 14);
+        resDate = new Date(subEnd); resDate.setDate(subEnd.getDate() + 7);
+      } else if (statusPreset === 'Live') {
+        regStart = new Date(now); regStart.setDate(now.getDate() - 5);
+        regEnd = new Date(now); regEnd.setDate(now.getDate() + 5);
+        subStart = new Date(now); subStart.setDate(now.getDate() - 2);
+        subEnd = new Date(now); subEnd.setDate(now.getDate() + 10);
+        resDate = new Date(subEnd); resDate.setDate(subEnd.getDate() + 7);
+      } else {
+        // Closed
+        regStart = new Date(now); regStart.setDate(now.getDate() - 45);
+        regEnd = new Date(regStart); regEnd.setDate(regStart.getDate() + 10);
+        subStart = new Date(regEnd); subStart.setDate(regEnd.getDate() + 1);
+        subEnd = new Date(subStart); subEnd.setDate(subStart.getDate() + 14);
+        resDate = new Date(now); resDate.setDate(now.getDate() - 2);
+      }
+
       const newComp = await competitionsApi.create({
         title,
         description,
@@ -41,17 +66,22 @@ const CreateCompetitionScreen = () => {
         entryFee: Number(entryFee),
         maxParticipants: Number(maxParticipants),
         image: 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800',
+        registrationStart: regStart.toISOString(),
+        registrationEnd: regEnd.toISOString(),
+        submissionStart: subStart.toISOString(),
+        submissionEnd: subEnd.toISOString(),
+        resultDate: resDate.toISOString(),
       });
 
       Alert.alert('Success!', 'Your competition has been published!', [
         { 
-          text: 'View Details', 
+          text: 'View Explore', 
           onPress: () => {
             // Reset form
             setTitle('');
             setDescription('');
-            // Navigate to the newly created competition
-            navigation.navigate('CompetitionDetail', { id: newComp.competition._id });
+            // Navigate to the Explore tab
+            navigation.navigate('MainTabs', { screen: 'Explore' });
           } 
         }
       ]);
@@ -139,6 +169,21 @@ const CreateCompetitionScreen = () => {
             onChangeText={setMaxParticipants}
             keyboardType="numeric"
           />
+
+          <Text style={styles.label}>Timeline Status (Demo) *</Text>
+          <View style={styles.statusGroup}>
+            {(['Upcoming', 'Live', 'Closed'] as const).map(preset => (
+              <TouchableOpacity 
+                key={preset} 
+                style={[styles.statusOption, statusPreset === preset && styles.statusOptionActive]}
+                onPress={() => setStatusPreset(preset)}
+              >
+                <Text style={[styles.statusOptionText, statusPreset === preset && styles.statusOptionTextActive]}>
+                  {preset}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
           <TouchableOpacity 
             style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]} 
@@ -254,6 +299,33 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     ...typography.button,
+    color: colors.textInverse,
+  },
+  statusGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+  },
+  statusOption: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginHorizontal: spacing.xs / 2,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surface,
+  },
+  statusOptionActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  statusOptionText: {
+    ...typography.caption,
+    fontWeight: '700',
+    color: colors.textSecondary,
+  },
+  statusOptionTextActive: {
     color: colors.textInverse,
   },
 });

@@ -147,7 +147,11 @@ const seed = async (): Promise<void> => {
     ].map(comp => ({
       ...comp,
       judge: { name: 'Judge', title: 'Expert', experience: '10+ Years', image: 'https://randomuser.me/api/portraits/women/75.jpg' },
-      previousWinners: [],
+      previousWinners: [
+        { name: 'Arjun', position: '1st Place', image: 'https://randomuser.me/api/portraits/men/32.jpg' },
+        { name: 'Priya', position: '2nd Place', image: 'https://randomuser.me/api/portraits/women/44.jpg' },
+        { name: 'Rohan', position: '3rd Place', image: 'https://randomuser.me/api/portraits/men/45.jpg' },
+      ],
       judgingParameters: [{ name: 'Creativity', description: 'Originality', weightage: 100 }],
       rules: ['Rule 1', 'Rule 2'],
       eligibility: ['Open to all'],

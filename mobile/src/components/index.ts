@@ -16,4 +16,5 @@ export { default as PrimaryActionButton } from './PrimaryActionButton';
 export { default as BottomNavigation } from './BottomNavigation';
 export { default as LoadingSkeleton } from './LoadingSkeleton';
 export { default as ErrorState } from './ErrorState';
+export { default as MySubmissionCard } from './MySubmissionCard';
 export { default as ProgressBar } from './ProgressBar';

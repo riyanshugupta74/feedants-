@@ -3,11 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../theme';
 import * as Clipboard from 'expo-clipboard';
 
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+
 interface Props {
   referralCode?: string;
 }
 
 const ReferralCard: React.FC<Props> = ({ referralCode }) => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const referralLink = `https://feedants.com/r/${referralCode || 'referral123'}`;
 
   const handleCopyLink = async () => {
@@ -38,7 +43,10 @@ const ReferralCard: React.FC<Props> = ({ referralCode }) => {
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity style={styles.referBtn}>
+        <TouchableOpacity 
+          style={styles.referBtn}
+          onPress={() => navigation.navigate('Referral')}
+        >
           <Text style={styles.referBtnText}>Refer Now</Text>
         </TouchableOpacity>
       </View>

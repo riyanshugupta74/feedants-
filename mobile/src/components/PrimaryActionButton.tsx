@@ -66,8 +66,9 @@ const PrimaryActionButton: React.FC<Props> = ({
     variant: 'primary' | 'success' | 'disabled';
   } => {
     if (!isAuthenticated) {
+      const feeText = competition.entryFee === 0 ? 'Free' : `₹${competition.entryFee}`;
       return {
-        text: 'Login to Register',
+        text: `Register Now — ${feeText}`,
         onPress: onLogin,
         disabled: false,
         variant: 'primary',
@@ -199,35 +200,43 @@ const PrimaryActionButton: React.FC<Props> = ({
       {/* Payment Modal */}
       <Modal visible={showPaymentModal} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Complete Payment</Text>
+          <View style={styles.checkoutModalContent}>
+            <View style={styles.checkoutHeader}>
+              <View>
+                <Text style={styles.checkoutBrand}>Feedants Pay</Text>
+                <Text style={styles.checkoutSub}>Secure Checkout</Text>
+              </View>
               <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
                 <Text style={styles.closeIcon}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.paymentSummary}>
-              <Text style={styles.summaryLabel}>Competition</Text>
-              <Text style={styles.summaryValue}>{competition.title}</Text>
-            </View>
-            
-            <View style={styles.paymentSummary}>
-              <Text style={styles.summaryLabel}>Total Amount</Text>
+            <View style={styles.checkoutSummary}>
+              <Text style={styles.summaryLabel}>{competition.title}</Text>
               <Text style={styles.amountValue}>₹{competition.entryFee}</Text>
             </View>
 
             <View style={styles.paymentMethods}>
-              <Text style={styles.methodsTitle}>Simulated Methods</Text>
+              <Text style={styles.methodsTitle}>Select Payment Method</Text>
               
               <TouchableOpacity style={styles.methodCard} onPress={handleSimulatedPayment}>
-                <Text style={styles.methodIcon}>💳</Text>
-                <Text style={styles.methodText}>Credit / Debit Card</Text>
+                <View style={styles.methodIconWrapper}>
+                  <Text style={styles.methodIcon}>💳</Text>
+                </View>
+                <View>
+                  <Text style={styles.methodText}>Credit / Debit Card</Text>
+                  <Text style={styles.methodDesc}>Visa, MasterCard, RuPay</Text>
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.methodCard} onPress={handleSimulatedPayment}>
-                <Text style={styles.methodIcon}>📱</Text>
-                <Text style={styles.methodText}>UPI (GPay, PhonePe)</Text>
+                <View style={styles.methodIconWrapper}>
+                  <Text style={styles.methodIcon}>📱</Text>
+                </View>
+                <View>
+                  <Text style={styles.methodText}>UPI</Text>
+                  <Text style={styles.methodDesc}>GPay, PhonePe, Paytm</Text>
+                </View>
               </TouchableOpacity>
             </View>
 
@@ -235,6 +244,7 @@ const PrimaryActionButton: React.FC<Props> = ({
               <View style={styles.processingOverlay}>
                 <ActivityIndicator size="large" color={colors.primary} />
                 <Text style={styles.processingText}>Processing Payment...</Text>
+                <Text style={styles.processingSub}>Please do not close this window</Text>
               </View>
             )}
           </View>
@@ -283,7 +293,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
-  modalContent: {
+  checkoutModalContent: {
     backgroundColor: colors.background,
     borderTopLeftRadius: borderRadius.lg,
     borderTopRightRadius: borderRadius.lg,
@@ -291,46 +301,49 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxxl,
     minHeight: 400,
   },
-  modalHeader: {
+  checkoutHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.xl,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  modalTitle: {
-    ...typography.h2,
-    color: colors.textPrimary,
+  checkoutBrand: {
+    ...typography.h3,
+    color: colors.primary,
+  },
+  checkoutSub: {
+    ...typography.caption,
+    color: colors.textTertiary,
   },
   closeIcon: {
     fontSize: 24,
     color: colors.textSecondary,
     fontWeight: '300',
   },
-  paymentSummary: {
+  checkoutSummary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
-    paddingBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.backgroundSecondary,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.xl,
   },
   summaryLabel: {
     ...typography.body,
-    color: colors.textSecondary,
-  },
-  summaryValue: {
-    ...typography.body,
     fontWeight: '600',
     color: colors.textPrimary,
-    maxWidth: '60%',
+    flex: 1,
   },
   amountValue: {
     ...typography.h2,
     color: colors.primary,
   },
   paymentMethods: {
-    marginTop: spacing.xl,
+    marginTop: spacing.xs,
   },
   methodsTitle: {
     ...typography.caption,
@@ -349,18 +362,31 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     marginBottom: spacing.md,
   },
-  methodIcon: {
-    fontSize: 24,
+  methodIconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.backgroundSecondary,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: spacing.md,
+  },
+  methodIcon: {
+    fontSize: 20,
   },
   methodText: {
     ...typography.body,
     fontWeight: '600',
     color: colors.textPrimary,
   },
+  methodDesc: {
+    ...typography.caption,
+    color: colors.textTertiary,
+    marginTop: 2,
+  },
   processingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(255,255,255,0.95)',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: borderRadius.lg,
@@ -369,6 +395,11 @@ const styles = StyleSheet.create({
     ...typography.h3,
     color: colors.primary,
     marginTop: spacing.md,
+  },
+  processingSub: {
+    ...typography.caption,
+    color: colors.textTertiary,
+    marginTop: spacing.xs,
   },
 });
 

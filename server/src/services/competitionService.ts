@@ -71,10 +71,7 @@ export const isSubmissionAllowed = (
 ): { allowed: boolean; reason?: string } => {
   const now = new Date();
 
-  if (now < competition.submissionStart) {
-    return { allowed: false, reason: 'Submission period has not started yet.' };
-  }
-
+  // Allow early submissions (e.g., right after registration)
   if (now > competition.submissionEnd) {
     return { allowed: false, reason: 'Submission period has ended.' };
   }

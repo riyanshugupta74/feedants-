@@ -24,6 +24,7 @@ import {
   BottomNavigation,
   LoadingSkeleton,
   ErrorState,
+  MySubmissionCard,
 } from '../components';
 
 import { useCompetition } from '../hooks/useCompetition';
@@ -139,6 +140,8 @@ const CompetitionDetailScreen: React.FC = () => {
         />
         
         <PreviousWinners winners={competition.previousWinners} />
+        
+        <MySubmissionCard participation={participation} />
         
         <CompetitionTabs competition={competition} />
         

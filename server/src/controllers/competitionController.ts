@@ -18,6 +18,7 @@ export const getCompetitions = async (
       limit = '10',
       category,
       status,
+      search,
     } = req.query;
 
     const pageNum = Math.max(1, parseInt(page as string, 10));
@@ -28,6 +29,12 @@ export const getCompetitions = async (
     const filter: any = {};
     if (category) filter.category = category;
     if (status) filter.status = status;
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     const [competitions, total] = await Promise.all([
       Competition.find(filter)
@@ -117,20 +124,25 @@ export const createCompetition = async (
       entryFee,
       maxParticipants,
       image,
+      registrationStart: bodyRegStart,
+      registrationEnd: bodyRegEnd,
+      submissionStart: bodySubStart,
+      submissionEnd: bodySubEnd,
+      resultDate: bodyResultDate,
     } = req.body;
 
     // Use current time to set default lifecycle dates for a new competition
     const now = new Date();
-    const registrationStart = new Date(now);
-    const registrationEnd = new Date(now);
-    registrationEnd.setDate(registrationEnd.getDate() + 7);
+    const registrationStart = bodyRegStart ? new Date(bodyRegStart) : new Date(now);
+    const registrationEnd = bodyRegEnd ? new Date(bodyRegEnd) : new Date(now);
+    if (!bodyRegEnd) registrationEnd.setDate(registrationEnd.getDate() + 7);
     
-    const submissionStart = new Date(registrationEnd);
-    const submissionEnd = new Date(submissionStart);
-    submissionEnd.setDate(submissionEnd.getDate() + 14);
+    const submissionStart = bodySubStart ? new Date(bodySubStart) : new Date(registrationEnd);
+    const submissionEnd = bodySubEnd ? new Date(bodySubEnd) : new Date(submissionStart);
+    if (!bodySubEnd) submissionEnd.setDate(submissionEnd.getDate() + 14);
     
-    const resultDate = new Date(submissionEnd);
-    resultDate.setDate(resultDate.getDate() + 7);
+    const resultDate = bodyResultDate ? new Date(bodyResultDate) : new Date(submissionEnd);
+    if (!bodyResultDate) resultDate.setDate(resultDate.getDate() + 7);
 
     const newCompetition = await Competition.create({
       title,

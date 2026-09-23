@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, TextInput } from 'react-native';
 import { useRoute, useNavigation, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing } from '../theme';
@@ -23,6 +23,17 @@ const ExploreScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // When navigated to with a category param, update active category
   useEffect(() => {
@@ -34,7 +45,10 @@ const ExploreScreen = () => {
   const fetchCompetitions = async () => {
     try {
       setError(null);
-      const params = activeCategory !== 'All' ? { category: activeCategory } : undefined;
+      const params: any = {};
+      if (activeCategory !== 'All') params.category = activeCategory;
+      if (debouncedSearchQuery.trim()) params.search = debouncedSearchQuery.trim();
+      
       const data = await competitionsApi.getAll(params);
       setCompetitions(data.competitions);
     } catch (err: any) {
@@ -50,7 +64,7 @@ const ExploreScreen = () => {
     useCallback(() => {
       setLoading(true);
       fetchCompetitions();
-    }, [activeCategory])
+    }, [activeCategory, debouncedSearchQuery])
   );
 
   const onRefresh = () => {
@@ -62,6 +76,25 @@ const ExploreScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Explore Competitions</Text>
+      </View>
+
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputWrapper}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search competitions, categories..."
+            placeholderTextColor={colors.textTertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearBtn}>
+              <Text style={styles.clearIcon}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
       
       {/* Category Filter */}
@@ -107,8 +140,8 @@ const ExploreScreen = () => {
         ) : competitions.length === 0 ? (
           <View style={styles.centerContainer}>
             <Text style={styles.emptyIcon}>🔍</Text>
-            <Text style={styles.emptyTitle}>No Competitions Found</Text>
-            <Text style={styles.emptySub}>We couldn't find any competitions in the {activeCategory} category right now. Check back later!</Text>
+            <Text style={styles.emptyTitle}>No Results</Text>
+            <Text style={styles.emptySub}>We couldn't find any competitions matching your search or category.</Text>
           </View>
         ) : (
           competitions.map((comp) => (
@@ -136,6 +169,43 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.h1,
     color: colors.textPrimary,
+  },
+  searchContainer: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+    height: 48,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  searchIcon: {
+    fontSize: 18,
+    marginRight: spacing.sm,
+    opacity: 0.7,
+  },
+  searchInput: {
+    flex: 1,
+    ...typography.body,
+    color: colors.textPrimary,
+    height: '100%',
+  },
+  clearBtn: {
+    padding: spacing.xs,
+  },
+  clearIcon: {
+    fontSize: 16,
+    color: colors.textTertiary,
   },
   categoriesWrapper: {
     borderBottomWidth: 1,
